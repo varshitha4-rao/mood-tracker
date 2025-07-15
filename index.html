@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mood Tracker</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>How Are You Feeling Today?</h1>
+    <select id="moodSelect">
+      <option value="">Select Mood</option>
+      <option value="😊 Happy">😊 Happy</option>
+      <option value="😢 Sad">😢 Sad</option>
+      <option value="😡 Angry">😡 Angry</option>
+      <option value="😴 Tired">😴 Tired</option>
+      <option value="😐 Meh">😐 Meh</option>
+    </select>
+    <button onclick="saveMood()">Save Mood</button>
+
+    <h2>Your Mood History</h2>
+    <ul id="moodHistory"></ul>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
