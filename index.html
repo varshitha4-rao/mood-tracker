@@ -4,24 +4,251 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Mood Tracker</title>
-  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg: #f0f4ff;
+      --card-bg: white;
+      --text: #000;
+      --button: #7c3aed;
+      --list-bg: rgba(0,0,0,0.05);
+    }
+    body.dark-mode {
+      --bg: #1a1a2e;
+      --card-bg: #2a2a40;
+      --text: #fff;
+      --button: #9b5de5;
+      --list-bg: rgba(255,255,255,0.1);
+    }
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      transition: background 0.3s, color 0.3s;
+      padding: 40px;
+    }
+    .container {
+      background: var(--card-bg);
+      padding: 25px;
+      border-radius: 16px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+      max-width: 600px;
+      margin: auto;
+      text-align: center;
+    }
+    select, button, textarea {
+      padding: 10px;
+      margin: 10px 0;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: var(--button);
+      color: white;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover {
+      opacity: 0.9;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+      text-align: left;
+    }
+    li {
+      background: var(--list-bg);
+      padding: 12px;
+      margin-bottom: 8px;
+      border-radius: 10px;
+    }
+    .dark-toggle {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: var(--button);
+      color: white;
+      padding: 5px 10px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    img.pet {
+      width: 100px;
+      height: 100px;
+      margin: 10px auto;
+      display: block;
+    }
+    .songs a {
+      display: block;
+      margin: 4px 0;
+      color: var(--button);
+      text-decoration: none;
+    }
+    canvas {
+      margin-top: 20px;
+    }
+  </style>
 </head>
 <body>
+  <button class="dark-toggle" onclick="toggleDarkMode()">🌗</button>
   <div class="container">
-    <h1>How Are You Feeling Today?</h1>
-    <select id="moodSelect">
+    <h2>How Are You Feeling Today?</h2>
+    <select id="mood">
       <option value="">Select Mood</option>
-      <option value="😊 Happy">😊 Happy</option>
-      <option value="😢 Sad">😢 Sad</option>
-      <option value="😡 Angry">😡 Angry</option>
-      <option value="😴 Tired">😴 Tired</option>
-      <option value="😐 Meh">😐 Meh</option>
+      <option value="happy">😊 Happy</option>
+      <option value="sad">😢 Sad</option>
+      <option value="angry">😡 Angry</option>
+      <option value="chill">😌 Chill</option>
+      <option value="love">😍 In Love</option>
     </select>
+    <textarea id="note" placeholder="Why do you feel this way?"></textarea>
     <button onclick="saveMood()">Save Mood</button>
 
-    <h2>Your Mood History</h2>
-    <ul id="moodHistory"></ul>
+    <img id="petImage" class="pet" src="" alt="Mood Cat" style="display:none;"/>
+    <div id="songs" class="songs"></div>
+
+    <h3>Your Mood History</h3>
+    <ul id="history"></ul>
+
+    <canvas id="moodChart" width="400" height="400"></canvas>
   </div>
-  <script src="script.js"></script>
+
+<script>
+const petImage = document.getElementById('petImage');
+const songsDiv = document.getElementById('songs');
+const historyList = document.getElementById('history');
+
+const moodSongs = {
+  happy: [
+    { title: 'Happy - Pharrell Williams', url: 'https://www.youtube.com/watch?v=ZbZSe6N_BXs' },
+    { title: 'Can’t Stop the Feeling!', url: 'https://www.youtube.com/watch?v=ru0K8uYEZWw' }
+  ],
+  sad: [
+    { title: 'Someone Like You - Adele', url: 'https://www.youtube.com/watch?v=hLQl3WQQoQ0' },
+    { title: 'Let Her Go - Passenger', url: 'https://www.youtube.com/watch?v=RBumgq5yVrA' }
+  ],
+  angry: [
+    { title: 'Stronger - Kanye West', url: 'https://www.youtube.com/watch?v=PsO6ZnUZI0g' },
+    { title: 'In The End - Linkin Park', url: 'https://www.youtube.com/watch?v=eVTXPUF4Oz4' }
+  ],
+  chill: [
+    { title: 'Weightless - Marconi Union', url: 'https://www.youtube.com/watch?v=UfcAVejslrU' },
+    { title: 'Coldplay - Sparks', url: 'https://www.youtube.com/watch?v=89Kz8Nxb-Bg' }
+  ],
+  love: [
+    { title: 'Perfect - Ed Sheeran', url: 'https://www.youtube.com/watch?v=2Vv-BfVoq4g' },
+    { title: 'All of Me - John Legend', url: 'https://www.youtube.com/watch?v=450p7goxZqg' }
+  ]
+};
+
+const moodCats = {
+  happy: 'https://i.imgur.com/1SmZJkA.png',
+  sad: 'https://i.imgur.com/jxWqIBf.png',
+  angry: 'https://i.imgur.com/Yy7SzT1.png',
+  chill: 'https://i.imgur.com/U8MZKUL.png',
+  love: 'https://i.imgur.com/G1e6KHa.png'
+};
+
+function saveMood() {
+  const mood = document.getElementById('mood').value;
+  const note = document.getElementById('note').value;
+  if (!mood) return alert('Please select a mood.');
+
+  const entry = { mood, note, date: new Date().toLocaleString() };
+  const history = JSON.parse(localStorage.getItem('moodHistory')) || [];
+  history.push(entry);
+  localStorage.setItem('moodHistory', JSON.stringify(history));
+
+  document.getElementById('note').value = '';
+  document.getElementById('mood').value = '';
+
+  displayHistory();
+  buildMoodChart();
+  showMoodExtras(mood);
+}
+
+function displayHistory() {
+  const history = JSON.parse(localStorage.getItem('moodHistory')) || [];
+  historyList.innerHTML = '';
+  history.forEach(e => {
+    const li = document.createElement('li');
+    li.textContent = `${e.date} — ${e.mood}`;
+    if (e.note) {
+      const p = document.createElement('p');
+      p.style.fontStyle = 'italic';
+      p.textContent = e.note;
+      li.appendChild(p);
+    }
+    historyList.appendChild(li);
+  });
+}
+
+function showMoodExtras(mood) {
+  petImage.src = moodCats[mood] || '';
+  petImage.style.display = moodCats[mood] ? 'block' : 'none';
+
+  songsDiv.innerHTML = '';
+  (moodSongs[mood] || []).forEach(song => {
+    const link = document.createElement('a');
+    link.href = song.url;
+    link.target = '_blank';
+    link.textContent = song.title;
+    songsDiv.appendChild(link);
+  });
+}
+
+function buildMoodChart() {
+  const data = JSON.parse(localStorage.getItem('moodHistory')) || [];
+  const counts = {};
+  data.forEach((entry) => {
+    counts[entry.mood] = (counts[entry.mood] || 0) + 1;
+  });
+
+  const labels = Object.keys(counts);
+  const values = Object.values(counts);
+  const ctx = document.getElementById("moodChart").getContext("2d");
+
+  if (window.moodChartInstance) {
+    window.moodChartInstance.destroy();
+  }
+
+  window.moodChartInstance = new Chart(ctx, {
+    type: "pie",
+    data: {
+      labels,
+      datasets: [{
+        label: "Mood Count",
+        data: values,
+        backgroundColor: ["#ff9ff3", "#feca57", "#ff6b6b", "#48dbfb", "#1dd1a1"],
+      }],
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { position: "bottom" } },
+    },
+  });
+}
+
+// Dark mode toggle
+function toggleDarkMode() {
+  document.body.classList.toggle('dark-mode');
+  localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+}
+
+function loadDarkMode() {
+  const darkMode = localStorage.getItem('darkMode') === 'true';
+  if (darkMode) document.body.classList.add('dark-mode');
+}
+
+// Initial load
+loadDarkMode();
+displayHistory();
+buildMoodChart();
+</script>
 </body>
 </html>

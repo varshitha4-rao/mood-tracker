@@ -1,27 +1,49 @@
 body {
-  font-family: Arial, sans-serif;
-  background: #fff8f0;
-  text-align: center;
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(to right, #fbd3e9, #bbd0ff);
   padding: 40px;
   color: #333;
+  text-align: center;
 }
 
 .container {
-  background: #ffffff;
-  padding: 20px;
+  background: rgba(255, 255, 255, 0.85);
+  padding: 25px;
   border-radius: 16px;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
   max-width: 500px;
   margin: auto;
 }
 
-select, button {
+select, button, textarea {
   padding: 10px;
-  margin: 10px;
+  margin: 10px 0;
   font-size: 16px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  width: 100%;
+}
+
+button {
+  background-color: #8e44ad;
+  color: white;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover {
+  background-color: #732d91;
 }
 
 ul {
   list-style: none;
   padding: 0;
+  text-align: left;
+}
+
+li {
+  background: #f0f0f0;
+  padding: 12px;
+  margin-bottom: 8px;
+  border-radius: 10px;
 }
